@@ -1,6 +1,9 @@
 ﻿// Copyright (c) 2012-2021 FuryLion Group. All Rights Reserved.
 
+using System;
+using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using Task3.Data;
 using Task3.Data.Weather;
 
@@ -8,10 +11,14 @@ namespace Task3
 {
     internal class Bootstrap
     {
+        private static readonly Storage _storage = new Storage();
+
         public static void Main(string[] args)
         {
+            _storage.Instantiate();
             Console.Clear();
             ShowMainMenu();
+            _storage.Dispose();
         }
 
         private static void ShowMainMenu()
@@ -113,52 +120,84 @@ namespace Task3
 
         private static void HandleDownloadWeather(CityInfo cityInfo)
         {
-            AllWeatherInfo? allWeatherInfo = null;
+            AllWeatherInfo? allWeatherInfo;
 
-            try
+            if (!_storage.WeatherInfos.TryGetValue(cityInfo.Name, out allWeatherInfo))
             {
-                allWeatherInfo = WeatherDownloads.DownloadWeather(cityInfo).GetAwaiter().GetResult();
-            }
-            catch (HttpRequestException e)
-            {
-                ShowMessageMenu(
-                    $"Download Weather request exception, status code - {e.StatusCode}, try again next time.");
-            }
+                try
+                {
+                    allWeatherInfo = WeatherDownloads.DownloadWeather(cityInfo).GetAwaiter().GetResult();
+                }
+                catch (HttpRequestException e)
+                {
+                    ShowMessageMenu(
+                        $"Download Weather request exception, status code - {e.StatusCode}, try again next time.");
+                }
 
-            if (allWeatherInfo == null)
-            {
-                ShowMessageMenu($"Something went wrong while Downloading Weather - weather info is null.");
-                return;
+                if (allWeatherInfo == null)
+                {
+                    ShowMessageMenu($"Something went wrong while Downloading Weather - weather info is null.");
+                    return;
+                }
             }
+            else
+                allWeatherInfo.Code = 200;
 
             if (allWeatherInfo.Code == 200)
+            {
+                try
+                {
+                    _storage.WeatherInfos.Add(cityInfo.Name, allWeatherInfo);
+                }
+                catch (ArgumentException e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+
                 ShowWeatherMenu(allWeatherInfo, cityInfo);
+            }
             else
                 ShowMessageMenu($"Something went wrong while Downloading Weather - status code {allWeatherInfo.Code}");
         }
 
         private static void HandleDownloadForecast(CityInfo cityInfo)
         {
-            ForecastInfo? forecastInfo = null;
+            ForecastInfo? forecastInfo;
 
-            try
+            if (!_storage.ForecastInfos.TryGetValue(cityInfo.Name, out forecastInfo))
             {
-                forecastInfo = WeatherDownloads.DownloadForeCast(cityInfo).GetAwaiter().GetResult();
-            }
-            catch (HttpRequestException e)
-            {
-                ShowMessageMenu(
-                    $"Download Forecast request exception, status code - {e.StatusCode}, try again next time.");
-            }
+                try
+                {
+                    forecastInfo = WeatherDownloads.DownloadForeCast(cityInfo).GetAwaiter().GetResult();
+                }
+                catch (HttpRequestException e)
+                {
+                    ShowMessageMenu(
+                        $"Download Forecast request exception, status code - {e.StatusCode}, try again next time.");
+                }
 
-            if (forecastInfo == null)
-            {
-                ShowMessageMenu("Something went wrong while Downloading Forecast - forecast info is null.");
-                return;
+                if (forecastInfo == null)
+                {
+                    ShowMessageMenu("Something went wrong while Downloading Forecast - forecast info is null.");
+                    return;
+                }
             }
+            else
+                forecastInfo.Code = 200;
 
             if (forecastInfo.Code == 200)
+            {
+                try
+                {
+                    _storage.ForecastInfos.Add(cityInfo.Name, forecastInfo);
+                }
+                catch (ArgumentException e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+
                 ShowForecastMenu(forecastInfo, cityInfo);
+            }
             else
                 ShowMessageMenu($"Something went wrong while Downloading Forecast - status code {forecastInfo.Code}");
         }

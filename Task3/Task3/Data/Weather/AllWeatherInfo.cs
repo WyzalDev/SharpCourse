@@ -1,10 +1,13 @@
 ﻿// Copyright (c) 2012-2021 FuryLion Group. All Rights Reserved.
 
+using System;
+using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
 
 namespace Task3.Data.Weather
 {
+    [Serializable]
     public class AllWeatherInfo
     {
         [JsonProperty("weather")] public List<WeatherInfo> Weather { get; set; }
@@ -21,7 +24,14 @@ namespace Task3.Data.Weather
 
         [JsonProperty("clouds")] public CloudsInfo Clouds { get; set; }
 
-        [JsonProperty("cod")] public int Code { get; set; }
+        [JsonProperty("cod")]
+        public int Code
+        {
+            get => _code;
+            set => _code = value;
+        }
+
+        [NonSerialized] private int _code;
 
         public override string ToString()
         {
