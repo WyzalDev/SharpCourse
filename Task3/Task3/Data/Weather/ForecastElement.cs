@@ -1,10 +1,13 @@
 ﻿// Copyright (c) 2012-2021 FuryLion Group. All Rights Reserved.
 
+using System;
+using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
 
 namespace Task3.Data.Weather
 {
+    [Serializable]
     public class ForecastElement
     {
         [JsonProperty("dt")] public long UnixTime { get; set; }

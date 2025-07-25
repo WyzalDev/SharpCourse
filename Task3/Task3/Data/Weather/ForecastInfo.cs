@@ -1,17 +1,27 @@
 ﻿// Copyright (c) 2012-2021 FuryLion Group. All Rights Reserved.
 
+using System;
+using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
 
 namespace Task3.Data.Weather
 {
+    [Serializable]
     public class ForecastInfo
     {
-        [JsonProperty("cod")] public int Code { get; set; }
-
         [JsonProperty("cnt")] public int Count { get; set; }
 
         [JsonProperty("list")] public List<ForecastElement> ForecastList { get; set; }
+
+        [JsonProperty("cod")]
+        public int Code
+        {
+            get => _code;
+            set => _code = value;
+        }
+
+        [NonSerialized] private int _code;
 
         public override string ToString()
         {

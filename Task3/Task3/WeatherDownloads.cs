@@ -1,6 +1,9 @@
 ﻿// Copyright (c) 2012-2021 FuryLion Group. All Rights Reserved.
 
+using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Task3.Data;
 using Task3.Data.Weather;
